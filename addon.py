@@ -228,8 +228,15 @@ elif mode[0] == 'station_date':
 
         time = date.strftime('%Y-%m-%d, %H:%M')
 
+        title = None
+
+        if "partOfSeries" in episode:
+            title = time + ": " + episode["partOfSeries"]["name"] + " - " + episode["name"]
+        else:
+            title = time + ": " + episode["name"]
+
         url = build_url({'mode': 'episode', 'pid': episode["identifier"]})
-        list_item = xbmcgui.ListItem(time + ": " + episode["partOfSeries"]["name"] + " - " + episode["name"])
+        list_item = xbmcgui.ListItem(title)
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item)
 
     xbmcplugin.endOfDirectory(addon_handle)
