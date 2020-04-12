@@ -255,6 +255,8 @@ def mode_station_date(pid, year, month, day):
 
         url = build_url({'mode': 'episode', 'pid': episode["identifier"]})
         list_item = xbmcgui.ListItem(title)
+        list_item.setInfo('video', {'plot': episode["description"]})
+        list_item.setThumbnailImage(episode["image"])
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item)
 
     xbmcplugin.endOfDirectory(addon_handle)
