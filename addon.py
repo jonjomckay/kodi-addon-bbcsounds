@@ -98,7 +98,7 @@ __addonname__ = __addon__.getAddonInfo('name')
 # Parse the stuff passed into the addon
 base_url = sys.argv[0]
 addon_handle = int(sys.argv[1])
-args = urlparse.parse_qs(sys.argv[2][1:])
+args = dict(urlparse.parse_qsl(sys.argv[2][1:]))
 
 xbmcplugin.setContent(addon_handle, 'audio')
 
@@ -107,9 +107,7 @@ def build_url(query):
     return base_url + '?' + urllib.urlencode(query)
 
 
-mode = args.get('mode', None)
-
-if mode is None:
+def mode_default():
     categories = {
         'podcasts': 'Podcasts',
         'stations': 'Stations'
@@ -122,9 +120,8 @@ if mode is None:
 
     xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'episode':
-    pid = args['pid'][0]
 
+def mode_episode(pid):
     programme = requests.get('https://www.bbc.co.uk/programmes/' + pid + '.json')
     programme_json = programme.json()["programme"]
 
@@ -157,7 +154,7 @@ elif mode[0] == 'episode':
         xbmcgui.Dialog().notification(__addonname__, "Episode not available to stream", icon=xbmcgui.NOTIFICATION_ERROR)
 
 
-elif mode[0] == 'podcasts':
+def mode_podcasts():
     podcasts = requests.get('https://www.bbc.co.uk/podcasts.json')
     podcasts_json = podcasts.json()["podcasts"]
 
@@ -171,9 +168,8 @@ elif mode[0] == 'podcasts':
 
     xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'podcast':
-    pid = args['pid'][0]
 
+def mode_podcast(pid):
     podcast = feedparser.parse('https://podcasts.files.bbci.co.uk/' + pid + '.rss')
 
     for entry in podcast.entries:
@@ -188,7 +184,7 @@ elif mode[0] == 'podcast':
     xbmcplugin.endOfDirectory(addon_handle)
 
 
-elif mode[0] == 'stations':
+def mode_stations():
     for pid, station in stations_ordered.items():
         url = build_url({'mode': 'station', 'pid': pid})
         li = xbmcgui.ListItem(station)
@@ -196,9 +192,8 @@ elif mode[0] == 'stations':
 
     xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'station':
-    pid = args['pid'][0]
 
+def mode_station(pid):
     base = datetime.datetime.today()
 
     # Create a range of the last 30 days
@@ -215,12 +210,8 @@ elif mode[0] == 'station':
 
     xbmcplugin.endOfDirectory(addon_handle)
 
-elif mode[0] == 'station_date':
-    pid = args['pid'][0]
-    year = args['year'][0]
-    month = args['month'][0]
-    day = args['day'][0]
 
+def mode_station_date(pid, year, month, day):
     # Load the schedules for the station
     schedule = get_page('https://www.bbc.co.uk/schedules/' + pid + '/' + year + '/' + month + '/' + day)
 
@@ -240,8 +231,6 @@ elif mode[0] == 'station_date':
 
         time = date.strftime('%Y-%m-%d, %H:%M')
 
-        title = None
-
         if "partOfSeries" in episode:
             title = time + ": " + episode["partOfSeries"]["name"] + " - " + episode["name"]
         else:
@@ -252,3 +241,21 @@ elif mode[0] == 'station_date':
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item)
 
     xbmcplugin.endOfDirectory(addon_handle)
+
+
+mode = args.get('mode', None)
+
+if mode is None:
+    mode_default()
+elif mode == 'episode':
+    mode_episode(args['pid'])
+elif mode == 'podcasts':
+    mode_podcasts()
+elif mode == 'podcast':
+    mode_podcast(args['pid'])
+elif mode == 'stations':
+    mode_stations()
+elif mode == 'station':
+    mode_station(args['pid'])
+elif mode == 'station_date':
+    mode_station_date(args['pid'], args['year'], args['month'], args['day'])
