@@ -6,6 +6,7 @@ import urlparse
 from collections import OrderedDict
 from operator import itemgetter
 
+import dateutil.parser
 import requests
 import xbmc
 import xbmcgui
@@ -163,7 +164,7 @@ elif mode[0] == 'station':
         day = '%02d' % date.day
 
         url = build_url({'mode': 'station_date', 'pid': pid, 'year': year, 'month': month, 'day': day})
-        list_item = xbmcgui.ListItem(year + "/" + month + "/" + day)
+        list_item = xbmcgui.ListItem(date.strftime('%Y-%m-%d'))
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item, isFolder=True)
 
     xbmcplugin.endOfDirectory(addon_handle)
@@ -189,9 +190,12 @@ elif mode[0] == 'station_date':
         raise RuntimeError("TODO: Couldn't find the episode stuff in the HTML")
 
     for episode in result["@graph"]:
+        date = dateutil.parser.parse(episode["publication"]["startDate"])
+
+        time = date.strftime('%Y-%m-%d, %H:%M')
+
         url = build_url({'mode': 'episode', 'pid': episode["identifier"]})
-        list_item = xbmcgui.ListItem(
-            episode["publication"]["startDate"][:16] + ": " + episode["partOfSeries"]["name"] + " - " + episode["name"])
+        list_item = xbmcgui.ListItem(time + ": " + episode["partOfSeries"]["name"] + " - " + episode["name"])
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item)
 
     xbmcplugin.endOfDirectory(addon_handle)
