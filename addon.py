@@ -222,9 +222,8 @@ def mode_station_date(pid, year, month, day):
             result = json.loads(tag.contents[0])
 
     if result is None:
-        # xbmc.log('schedule: ' + result['@context'], level=xbmc.LOGERROR)
-
-        raise RuntimeError("TODO: Couldn't find the episode stuff in the HTML")
+        xbmcgui.Dialog().notification(__addonname__, "Something went wrong parsing the station's schedule", icon=xbmcgui.NOTIFICATION_ERROR)
+        return
 
     for episode in result["@graph"]:
         date = dateutil.parser.parse(episode["publication"]["startDate"])
