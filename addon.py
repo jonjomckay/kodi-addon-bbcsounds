@@ -164,6 +164,11 @@ def mode_podcasts():
     for podcast in podcasts_ordered:
         url = build_url({'mode': 'podcast', 'pid': podcast["shortTitle"]})
         li = xbmcgui.ListItem(podcast["title"])
+        li.setInfo('video', {'plot': podcast["description"]})
+
+        if "imageUrl" in podcast:
+            li.setThumbnailImage(podcast["imageUrl"].replace('{recipe}', '624x624'))
+
         xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li, isFolder=True)
 
     xbmcplugin.endOfDirectory(addon_handle)
@@ -172,14 +177,21 @@ def mode_podcasts():
 def mode_podcast(pid):
     podcast = feedparser.parse('https://podcasts.files.bbci.co.uk/' + pid + '.rss')
 
+    image_url = None
+
+    if "image" in podcast.feed:
+        image_url = podcast.feed.image.url
+
     for entry in podcast.entries:
         entry_pid = entry.ppg_canonical.split('/')
-        entry_date = datetime.datetime.fromtimestamp(mktime(entry.published_parsed)).strftime('%Y-%m-%d, %H:%M')
+        entry_date = datetime.datetime.fromtimestamp(mktime(entry.published_parsed)).strftime('%Y-%m-%d')
         entry_title = entry_date + ": " + entry.title
 
         if len(entry_pid) > 2:
             url = build_url({'mode': 'episode', 'pid': entry_pid[2]})
             li = xbmcgui.ListItem(entry_title)
+            li.setInfo('video', {'plot': entry.description})
+            li.setThumbnailImage(image_url)
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li)
         else:
             xbmc.log('No pid could be found for the item at ' + entry.link, level=xbmc.LOGERROR)
@@ -225,7 +237,8 @@ def mode_station_date(pid, year, month, day):
             result = json.loads(tag.contents[0])
 
     if result is None:
-        xbmcgui.Dialog().notification(__addonname__, "Something went wrong parsing the station's schedule", icon=xbmcgui.NOTIFICATION_ERROR)
+        xbmcgui.Dialog().notification(__addonname__, "Something went wrong parsing the station's schedule",
+                                      icon=xbmcgui.NOTIFICATION_ERROR)
         return
 
     for episode in result["@graph"]:
