@@ -5,8 +5,10 @@ import urllib
 import urlparse
 from collections import OrderedDict
 from operator import itemgetter
+from time import mktime
 
 import dateutil.parser
+import feedparser
 import requests
 import xbmc
 import xbmcgui
@@ -105,6 +107,7 @@ mode = args.get('mode', None)
 
 if mode is None:
     categories = {
+        'podcasts': 'Podcasts',
         'stations': 'Stations'
     }
 
@@ -141,6 +144,37 @@ elif mode[0] == 'episode':
     })
 
     xbmc.Player().play(url, play_item)
+
+elif mode[0] == 'podcasts':
+    podcasts = requests.get('https://www.bbc.co.uk/podcasts.json')
+    podcasts_json = podcasts.json()["podcasts"]
+
+    # Sort the podcasts by title
+    podcasts_ordered = sorted(podcasts_json, key=lambda x: x["title"])
+
+    for podcast in podcasts_ordered:
+        url = build_url({'mode': 'podcast', 'pid': podcast["shortTitle"]})
+        li = xbmcgui.ListItem(podcast["title"])
+        xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li, isFolder=True)
+
+    xbmcplugin.endOfDirectory(addon_handle)
+
+elif mode[0] == 'podcast':
+    pid = args['pid'][0]
+
+    podcast = feedparser.parse('https://podcasts.files.bbci.co.uk/' + pid + '.rss')
+
+    for entry in podcast.entries:
+        entry_pid = entry.id.split(':')
+        entry_date = datetime.datetime.fromtimestamp(mktime(entry.published_parsed)).strftime('%Y-%m-%d, %H:%M')
+        entry_title = entry_date + ": " + entry.title
+
+        url = build_url({'mode': 'episode', 'pid': entry_pid[3]})
+        li = xbmcgui.ListItem(entry_title)
+        xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li)
+
+    xbmcplugin.endOfDirectory(addon_handle)
+
 
 elif mode[0] == 'stations':
     for pid, station in stations_ordered.items():
