@@ -11,6 +11,7 @@ import dateutil.parser
 import feedparser
 import requests
 import xbmc
+import xbmcaddon
 import xbmcgui
 import xbmcplugin
 
@@ -90,6 +91,8 @@ def get_page(url):
     # and parse the page using BeautifulSoup
     return BeautifulSoup(requests.get(url).text, 'html.parser')
 
+__addon__ = xbmcaddon.Addon()
+__addonname__ = __addon__.getAddonInfo('name')
 
 # Parse the stuff passed into the addon
 base_url = sys.argv[0]
@@ -124,26 +127,34 @@ elif mode[0] == 'episode':
     programme = requests.get('https://www.bbc.co.uk/programmes/' + pid + '.json')
     programme_json = programme.json()["programme"]
 
-    version = programme_json["versions"][0]["pid"]
+    url = None
 
-    playlist = requests.get(
-        'https://open.live.bbc.co.uk/mediaselector/6/select/version/2.0/mediaset/iptv-all/vpid/' + version + '/format/json?cb=80501')
-    playlist_json = playlist.json()
+    for version in programme_json["versions"]:
+        playlist = requests.get(
+            'https://open.live.bbc.co.uk/mediaselector/6/select/version/2.0/mediaset/iptv-all/vpid/' + version["pid"] + '/format/json')
+        playlist_json = playlist.json()
 
-    url = playlist_json["media"][0]["connection"][1]["href"]
+        if "media" not in playlist_json:
+            continue
 
-    play_item = xbmcgui.ListItem(path=url)
-    play_item.setArt({
-        'thumb': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg',
-        'icon': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg'
-    })
-    play_item.setInfo('music', {
-        'title': programme_json["display_title"]["title"],
-        'artist': programme_json["display_title"]["subtitle"],
-        'comment': programme_json["short_synopsis"]
-    })
+        url = playlist_json["media"][0]["connection"][1]["href"]
 
-    xbmc.Player().play(url, play_item)
+        play_item = xbmcgui.ListItem(path=url)
+        play_item.setArt({
+            'thumb': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg',
+            'icon': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg'
+        })
+        play_item.setInfo('music', {
+            'title': programme_json["display_title"]["title"],
+            'artist': programme_json["display_title"]["subtitle"],
+            'comment': programme_json["short_synopsis"]
+        })
+
+        xbmc.Player().play(url, play_item)
+
+    if url is None:
+        xbmcgui.Dialog().notification(__addonname__, "Episode not available to stream", icon=xbmcgui.NOTIFICATION_ERROR)
+
 
 elif mode[0] == 'podcasts':
     podcasts = requests.get('https://www.bbc.co.uk/podcasts.json')
