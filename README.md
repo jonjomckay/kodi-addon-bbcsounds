@@ -8,6 +8,8 @@ BBC Sounds for Kodi (plugin.audio.bbcsounds)
 
 ## License
 
+This addon is released under the MIT license.
+
 ## Disclaimer
 
 This plugin is not endorsed, commissioned or supported by the BBC.
