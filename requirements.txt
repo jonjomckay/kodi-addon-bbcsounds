@@ -2,6 +2,6 @@ beautifulsoup4==4.3.2
 feedparser==5.2.1
 Kodistubs==18.0.0
 python-dateutil==2.8.1
-requests==2.9.1
+requests==2.20.0
 six==1.14.0
 typing==3.7.4.1
