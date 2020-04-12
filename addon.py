@@ -135,8 +135,8 @@ elif mode[0] == 'episode':
         'icon': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg'
     })
     play_item.setInfo('music', {
-        'title': programme_json["display_title"]["subtitle"],
-        'artist': programme_json["display_title"]["title"],
+        'title': programme_json["display_title"]["title"],
+        'artist': programme_json["display_title"]["subtitle"],
         'comment': programme_json["short_synopsis"]
     })
 
