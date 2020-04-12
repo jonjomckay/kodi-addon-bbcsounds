@@ -173,13 +173,16 @@ def mode_podcast(pid):
     podcast = feedparser.parse('https://podcasts.files.bbci.co.uk/' + pid + '.rss')
 
     for entry in podcast.entries:
-        entry_pid = entry.id.split(':')
+        entry_pid = entry.ppg_canonical.split('/')
         entry_date = datetime.datetime.fromtimestamp(mktime(entry.published_parsed)).strftime('%Y-%m-%d, %H:%M')
         entry_title = entry_date + ": " + entry.title
 
-        url = build_url({'mode': 'episode', 'pid': entry_pid[3]})
-        li = xbmcgui.ListItem(entry_title)
-        xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li)
+        if len(entry_pid) > 2:
+            url = build_url({'mode': 'episode', 'pid': entry_pid[2]})
+            li = xbmcgui.ListItem(entry_title)
+            xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li)
+        else:
+            xbmc.log('No pid could be found for the item at ' + entry.link, level=xbmc.LOGERROR)
 
     xbmcplugin.endOfDirectory(addon_handle)
 
