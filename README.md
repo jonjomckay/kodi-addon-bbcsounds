@@ -15,7 +15,7 @@ BBC Sounds for Kodi (plugin.audio.bbcsounds)
 
 ## License
 
-This addon is released under the MIT license.
+This addon is released under the MIT license. It uses BBC logos from [this official repository](https://github.com/bbc/rmp-shared-assets), released under the ISC license.
 
 ## Disclaimer
 
