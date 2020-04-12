@@ -1,0 +1,4 @@
+beautifulsoup4==4.3.2
+Kodistubs==18.0.0
+requests==2.9.1
+typing==3.7.4.1
