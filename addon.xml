@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<addon id="plugin.audio.bbc-sounds" name="BBC Sounds" version="0.0.1">
+<addon id="plugin.audio.bbcsounds" name="BBC Sounds" version="0.0.1" provider-name="jonjomckay">
     <requires>
         <import addon="xbmc.python" version="2.20.0" />
         <import addon="script.module.beautifulsoup4" version="4.3.2" />
@@ -11,10 +11,13 @@
         <provides>audio</provides>
     </extension>
     <extension point="xbmc.addon.metadata">
-        <summary lang="en">http://www.theaudiodb.com/testfiles/</summary>
-        <license>GNU General Public License, v2</license>
-        <description lang="en">Add-on tutorial for Audio using cc licensed audio from http://www.theaudiodb.com/</description>
+        <summary lang="en">Listen to programmes and podcasts from BBC Sounds</summary>
+        <license>MIT</license>
+        <description lang="en">This addon allows you to listen to programmes and podcasts from BBC Sounds, with content from all BBC radio stations.</description>
         <platform>all</platform>
+        <website>https://www.bbc.co.uk/sounds</website>
+        <source>https://github.com/jonjomckay/kodi-addon-bbcsounds</source>
+        <disclaimer lang="en">This plugin is not endorsed, commissioned or supported by the BBC</disclaimer>
         <assets>
             <icon>resources/icon.png</icon>
         </assets>
