@@ -130,7 +130,7 @@ elif mode[0] == 'episode':
         'https://open.live.bbc.co.uk/mediaselector/6/select/version/2.0/mediaset/iptv-all/vpid/' + version + '/format/json?cb=80501')
     playlist_json = playlist.json()
 
-    url = playlist_json["media"][1]["connection"][1]["href"]
+    url = playlist_json["media"][0]["connection"][1]["href"]
 
     play_item = xbmcgui.ListItem(path=url)
     play_item.setArt({
