@@ -125,7 +125,7 @@ def mode_episode(pid):
     programme = requests.get('https://www.bbc.co.uk/programmes/' + pid + '.json')
     programme_json = programme.json()["programme"]
 
-    url = None
+    picked_url = None
 
     for version in programme_json["versions"]:
         playlist = requests.get(
@@ -133,11 +133,22 @@ def mode_episode(pid):
         playlist_json = playlist.json()
 
         if "media" not in playlist_json:
+            # TODO
             continue
 
-        url = playlist_json["media"][0]["connection"][1]["href"]
+        # Filter by only audio items, and order with the highest bitrate first
+        audio_items = [item for item in playlist_json['media'] if item['kind'] == 'audio']
+        audio_items.sort(key=lambda x: x['bitrate'], reverse=True)
 
-        play_item = xbmcgui.ListItem(path=url)
+        xbmc.log('Found {0} audio items for the programme version {1}'.format(len(audio_items), version['pid']), level=xbmc.LOGNOTICE)
+
+        # Pick the first stream available for the highest bitrate item
+        picked_stream = audio_items[0]
+        picked_url = picked_stream["connection"][1]["href"]
+
+        xbmc.log('Picked the {0} stream with the bitrate {1}'.format(picked_stream['encoding'], picked_stream['bitrate']), level=xbmc.LOGNOTICE)
+
+        play_item = xbmcgui.ListItem(path=picked_url)
         play_item.setArt({
             'thumb': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg',
             'icon': 'https://ichef.bbci.co.uk/images/ic/480xn/' + programme_json["image"]["pid"] + '.jpg'
@@ -148,9 +159,9 @@ def mode_episode(pid):
             'comment': programme_json["short_synopsis"]
         })
 
-        xbmc.Player().play(url, play_item)
+        xbmc.Player().play(picked_url, play_item)
 
-    if url is None:
+    if picked_url is None:
         xbmcgui.Dialog().notification(__addonname__, "Episode not available to stream", icon=xbmcgui.NOTIFICATION_ERROR)
 
 
