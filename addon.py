@@ -5,7 +5,6 @@ import sys
 import urllib
 import urlparse
 from collections import OrderedDict
-from operator import itemgetter
 from time import mktime
 
 import dateutil.parser
