@@ -232,7 +232,7 @@ def mode_station(pid):
         day = '%02d' % date.day
 
         url = build_url({'mode': 'station_date', 'pid': pid, 'year': year, 'month': month, 'day': day})
-        list_item = xbmcgui.ListItem(date.strftime('%Y-%m-%d'))
+        list_item = xbmcgui.ListItem(date.strftime('%Y-%m-%d (%A)'))
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item, isFolder=True)
 
     xbmcplugin.endOfDirectory(addon_handle)
