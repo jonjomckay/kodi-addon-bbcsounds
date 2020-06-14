@@ -156,6 +156,7 @@ def mode_episode(pid):
         play_item.setInfo('music', {
             'title': programme_json["display_title"]["title"],
             'artist': programme_json["display_title"]["subtitle"],
+            'album': programme_json["ownership"]["service"]["title"],
             'comment': programme_json["short_synopsis"]
         })
 
