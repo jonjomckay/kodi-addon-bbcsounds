@@ -160,7 +160,7 @@ def mode_episode(pid):
             'comment': programme_json["short_synopsis"]
         })
 
-        xbmc.Player().play(picked_url, play_item)
+        xbmcplugin.setResolvedUrl(addon_handle, True, listitem=play_item)
 
     if picked_url is None:
         xbmcgui.Dialog().notification(__addonname__, "Episode not available to stream", icon=xbmcgui.NOTIFICATION_ERROR)
@@ -265,10 +265,14 @@ def mode_station_date(pid, year, month, day):
             title = time + ": " + episode["name"]
 
         url = build_url({'mode': 'episode', 'pid': episode["identifier"]})
+
         list_item = xbmcgui.ListItem(title)
         list_item.setInfo('video', {'plot': episode["description"]})
+        list_item.setPath(url)
+        list_item.setProperty('IsPlayable', "true")
         list_item.setThumbnailImage(episode["image"])
-        xbmcplugin.addDirectoryItem(addon_handle, url, list_item)
+
+        xbmcplugin.addDirectoryItem(addon_handle, url, list_item, isFolder=False)
 
     xbmcplugin.endOfDirectory(addon_handle)
 
