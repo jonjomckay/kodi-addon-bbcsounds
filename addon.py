@@ -204,6 +204,7 @@ def mode_podcast(pid):
             li = xbmcgui.ListItem(entry_title)
             li.setInfo('video', {'plot': entry.description})
             li.setThumbnailImage(image_url)
+            li.setProperty('IsPlayable', 'true')
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li)
         else:
             xbmc.log('No pid could be found for the item at ' + entry.link, level=xbmc.LOGERROR)
