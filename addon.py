@@ -2,8 +2,8 @@ import datetime
 import json
 import os
 import sys
-import urllib
-import urlparse
+import urllib.request, urllib.parse, urllib.error
+import urllib.parse
 from collections import OrderedDict
 from time import mktime
 
@@ -83,7 +83,7 @@ stations = {
     'p02jf21y': {'name': 'CBeebies Radio', 'image': 'cbeebies_radio_colour'},
 }
 
-stations_ordered = OrderedDict(sorted(stations.items(), key=lambda x: x[1]['name']))
+stations_ordered = OrderedDict(sorted(list(stations.items()), key=lambda x: x[1]['name']))
 
 
 def get_page(url):
@@ -98,13 +98,13 @@ __addonname__ = __addon__.getAddonInfo('name')
 # Parse the stuff passed into the addon
 base_url = sys.argv[0]
 addon_handle = int(sys.argv[1])
-args = dict(urlparse.parse_qsl(sys.argv[2][1:]))
+args = dict(urllib.parse.parse_qsl(sys.argv[2][1:]))
 
 xbmcplugin.setContent(addon_handle, 'audio')
 
 
 def build_url(query):
-    return base_url + '?' + urllib.urlencode(query)
+    return base_url + '?' + urllib.parse.urlencode(query)
 
 
 def mode_default():
@@ -113,7 +113,7 @@ def mode_default():
         'stations': 'Stations'
     }
 
-    for mode, category in categories.items():
+    for mode, category in list(categories.items()):
         url = build_url({'mode': mode})
         li = xbmcgui.ListItem(category)
         xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li, isFolder=True)
@@ -140,13 +140,13 @@ def mode_episode(pid):
         audio_items = [item for item in playlist_json['media'] if item['kind'] == 'audio']
         audio_items.sort(key=lambda x: x['bitrate'], reverse=True)
 
-        xbmc.log('Found {0} audio items for the programme version {1}'.format(len(audio_items), version['pid']), level=xbmc.LOGNOTICE)
+        xbmc.log('Found {0} audio items for the programme version {1}'.format(len(audio_items), version['pid']), level=xbmc.LOGINFO)
 
         # Pick the first stream available for the highest bitrate item
         picked_stream = audio_items[0]
         picked_url = picked_stream["connection"][1]["href"]
 
-        xbmc.log('Picked the {0} stream with the bitrate {1}'.format(picked_stream['encoding'], picked_stream['bitrate']), level=xbmc.LOGNOTICE)
+        xbmc.log('Picked the {0} stream with the bitrate {1}'.format(picked_stream['encoding'], picked_stream['bitrate']), level=xbmc.LOGINFO)
 
         play_item = xbmcgui.ListItem(path=picked_url)
         play_item.setArt({
@@ -179,7 +179,7 @@ def mode_podcasts():
         li.setInfo('video', {'plot': podcast["description"]})
 
         if "imageUrl" in podcast:
-            li.setThumbnailImage(podcast["imageUrl"].replace('{recipe}', '624x624'))
+            li.setArt({"thumb": podcast["imageUrl"].replace('{recipe}', '624x624')})
 
         xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li, isFolder=True)
 
@@ -203,7 +203,7 @@ def mode_podcast(pid):
             url = build_url({'mode': 'episode', 'pid': entry_pid[2]})
             li = xbmcgui.ListItem(entry_title)
             li.setInfo('video', {'plot': entry.description})
-            li.setThumbnailImage(image_url)
+            li.setArt({"thumb": image_url})
             li.setProperty('IsPlayable', 'true')
             xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li)
         else:
@@ -213,10 +213,10 @@ def mode_podcast(pid):
 
 
 def mode_stations():
-    for pid, station in stations_ordered.items():
+    for pid, station in list(stations_ordered.items()):
         url = build_url({'mode': 'station', 'pid': pid})
         li = xbmcgui.ListItem(station['name'])
-        li.setThumbnailImage(xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'), 'resources', station['image'] + '.png')))
+        li.setArt({"thumb": xbmc.translatePath(os.path.join(__addon__.getAddonInfo('path'), 'resources', station['image'] + '.png'))})
         xbmcplugin.addDirectoryItem(handle=addon_handle, url=url, listitem=li, isFolder=True)
 
     xbmcplugin.endOfDirectory(addon_handle)
@@ -271,7 +271,7 @@ def mode_station_date(pid, year, month, day):
         list_item.setInfo('video', {'plot': episode["description"]})
         list_item.setPath(url)
         list_item.setProperty('IsPlayable', "true")
-        list_item.setThumbnailImage(episode["image"])
+        list_item.setArt({"thumb": episode["image"]})
 
         xbmcplugin.addDirectoryItem(addon_handle, url, list_item, isFolder=False)
 
